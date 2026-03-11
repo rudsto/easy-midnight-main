@@ -1,0 +1,141 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<title>Midnight</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="" />
+
+	<!-- Open Graph -->
+	<meta property="og:title" content="Midnight" />
+	<meta property="og:description" content="" />
+	<meta property="og:type" content="website" />
+
+	<link rel="icon" type="image/png" href="images/favicon.png" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="assets/css/midnight.css" />
+</head>
+<body>
+
+	<!-- Nav -->
+	<nav>
+		<div class="nav-inner">
+			<a href="#" class="nav-logo">Midnight</a>
+			<ul class="nav-links">
+				<li><a href="#about">About</a></li>
+				<li><a href="#contact" class="nav-cta">Get in touch</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<main>
+
+		<!-- Hero -->
+		<section id="hero">
+			<div class="hero-content">
+				<div class="badge">
+					<span class="badge-dot"></span>
+					Midnight
+				</div>
+				<h1><!-- Hero headline --></h1>
+				<p class="hero-sub">
+					<!-- Hero subheadline -->
+				</p>
+				<div class="hero-actions">
+					<a href="#contact" class="btn-primary">Get in touch</a>
+					<a href="#about" class="btn-ghost">
+						Learn more <span class="arrow">→</span>
+					</a>
+				</div>
+			</div>
+		</section>
+
+		<!-- About -->
+		<section id="about">
+			<div class="section-inner">
+				<p class="section-label fade-up">About</p>
+				<div class="about-text">
+					<h2 class="fade-up delay-1"><!-- About headline --></h2>
+					<p class="fade-up delay-2">
+						<!-- About body copy -->
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Pillars -->
+		<section id="pillars">
+			<div class="section-inner pillars-grid">
+				<div class="pillar fade-up delay-1">
+					<h3><!-- Pillar 1 title --></h3>
+					<p><!-- Pillar 1 body --></p>
+				</div>
+				<div class="pillar fade-up delay-2">
+					<h3><!-- Pillar 2 title --></h3>
+					<p><!-- Pillar 2 body --></p>
+				</div>
+				<div class="pillar fade-up delay-3">
+					<h3><!-- Pillar 3 title --></h3>
+					<p><!-- Pillar 3 body --></p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Contact -->
+		<section id="contact">
+			<div class="section-inner contact-simple">
+				<div class="fade-up">
+					<p class="section-label">Contact</p>
+					<h2><!-- Contact headline --></h2>
+					<p>
+						<!-- Contact body copy -->
+					</p>
+					<div class="contact-actions">
+						<a href="mailto:" class="btn-primary">Send us a message</a>
+						<a href="#" target="_blank" rel="noopener" class="btn-ghost">
+							<!-- Social link <span class="arrow">↗</span> -->
+						</a>
+					</div>
+				</div>
+			</div>
+		</section>
+
+	</main>
+
+	<footer>
+		<div class="footer-inner">
+			<a href="#" class="footer-logo">Midnight</a>
+			<p>&copy; 2025 Midnight</p>
+		</div>
+	</footer>
+
+	<script>
+		const observer = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) entry.target.classList.add('visible');
+			});
+		}, { threshold: 0.12 });
+
+		document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+		document.querySelectorAll('a[href^="#"]').forEach(link => {
+			link.addEventListener('click', e => {
+				const href = link.getAttribute('href');
+				if (href === '#') {
+					e.preventDefault();
+					window.scrollTo({ top: 0, behavior: 'smooth' });
+					return;
+				}
+				const target = document.querySelector(href);
+				if (target) {
+					e.preventDefault();
+					target.scrollIntoView({ behavior: 'smooth' });
+				}
+			});
+		});
+	</script>
+
+</body>
+</html>
