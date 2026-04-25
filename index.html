@@ -15,8 +15,555 @@
 	<link rel="icon" type="image/png" href="images/favicon.png" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet" />
-	<link rel="stylesheet" href="assets/css/midnight.css" />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+	<style>
+	:root {
+	  --bg:             #0d0b09;
+	  --surface:        #17120f;
+	  --surface-2:      #211a15;
+	  --accent:         #d97757;
+	  --accent-r:       217;
+	  --accent-g:       119;
+	  --accent-b:        87;
+	  --accent-dim:     rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.10);
+	  --accent-border:  rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.22);
+	  --accent-soft:    rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.55);
+	  --text:           #ede8e3;
+	  --muted:          #8a7a70;
+	  --muted-2:        #4f4039;
+	  --border:         rgba(255, 255, 255, 0.07);
+	  --border-strong:  rgba(255, 255, 255, 0.12);
+
+	  /* Tweakable: tempo (rotation seconds, pulse seconds) */
+	  --rotate-dur:     28s;
+	  --pulse-dur:      2.4s;
+	  --ping-dur:       2.6s;
+	  --orbit-dur:      60s;
+	  --orbit-dur-2:   120s;
+
+	  /* Tweakable: density (continent dot opacity / meridian opacity) */
+	  --continent-op:   0.55;
+	  --meridian-op:    0.22;
+	  --extra-data-op:  0;   /* 0 hides extra data ring */
+
+	  /* Tweakable: mood — atmospheric glow strength */
+	  --glow-1:         0.10;
+	  --glow-2:         0.05;
+	}
+
+	*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+	html, body { height: 100%; }
+
+	body {
+	  background: var(--bg);
+	  color: var(--text);
+	  font-family: 'Inter', sans-serif;
+	  font-size: 16px;
+	  line-height: 1.6;
+	  overflow: hidden;
+	  -webkit-font-smoothing: antialiased;
+	  -moz-osx-font-smoothing: grayscale;
+	  position: relative;
+	}
+
+	/* Atmospheric warm glow */
+	body::before {
+	  content: '';
+	  position: fixed;
+	  inset: 0;
+	  background:
+	    radial-gradient(ellipse 70% 50% at 75% 50%, rgba(var(--accent-r), var(--accent-g), var(--accent-b), var(--glow-1)) 0%, transparent 60%),
+	    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(var(--accent-r), var(--accent-g), var(--accent-b), var(--glow-2)) 0%, transparent 55%);
+	  pointer-events: none;
+	  z-index: 0;
+	  transition: background 0.6s ease;
+	}
+
+	/* Subtle grid texture */
+	body::after {
+	  content: '';
+	  position: fixed;
+	  inset: 0;
+	  background-image:
+	    linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px),
+	    linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px);
+	  background-size: 80px 80px;
+	  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
+	  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
+	  pointer-events: none;
+	  z-index: 0;
+	}
+
+	/* ─── Nav ─── */
+	nav {
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	  right: 0;
+	  z-index: 100;
+	  backdrop-filter: blur(16px);
+	  -webkit-backdrop-filter: blur(16px);
+	  background: rgba(13, 11, 9, 0.55);
+	  border-bottom: 1px solid var(--border);
+	}
+
+	.nav-inner {
+	  max-width: 1320px;
+	  margin: 0 auto;
+	  padding: 0 2.5rem;
+	  height: 4.25rem;
+	  display: flex;
+	  align-items: center;
+	  justify-content: space-between;
+	}
+
+	.nav-logo {
+	  font-size: 0.95rem;
+	  font-weight: 700;
+	  letter-spacing: 0.14em;
+	  text-transform: uppercase;
+	  color: var(--text);
+	  text-decoration: none;
+	  display: inline-flex;
+	  align-items: center;
+	  gap: 0.65rem;
+	}
+
+	.nav-logo::before {
+	  content: '';
+	  width: 8px;
+	  height: 8px;
+	  background: var(--accent);
+	  border-radius: 50%;
+	  box-shadow: 0 0 12px var(--accent);
+	}
+
+	.nav-links {
+	  display: flex;
+	  gap: 2.5rem;
+	  list-style: none;
+	  align-items: center;
+	}
+
+	.nav-links a {
+	  color: var(--muted);
+	  text-decoration: none;
+	  font-size: 0.82rem;
+	  letter-spacing: 0.06em;
+	  transition: color 0.2s;
+	}
+
+	.nav-links a:hover { color: var(--text); }
+
+	.nav-cta {
+	  font-size: 0.74rem !important;
+	  letter-spacing: 0.12em !important;
+	  text-transform: uppercase;
+	  color: var(--accent) !important;
+	  border: 1px solid var(--accent-border);
+	  padding: 0.5rem 1.1rem;
+	  transition: background 0.25s, color 0.25s !important;
+	}
+
+	.nav-cta:hover {
+	  background: var(--accent) !important;
+	  color: var(--bg) !important;
+	}
+
+	/* ─── Stage / layout ─── */
+	main {
+	  position: relative;
+	  z-index: 1;
+	  height: 100vh;
+	  display: grid;
+	  grid-template-columns: 1.05fr 1fr;
+	  align-items: center;
+	  max-width: 1320px;
+	  margin: 0 auto;
+	  padding: 5rem 2.5rem 4rem;
+	  gap: 2rem;
+	}
+
+	/* ─── Hero text ─── */
+	.hero-content { max-width: 600px; }
+
+	.eyebrow {
+	  display: inline-flex;
+	  align-items: center;
+	  gap: 0.6rem;
+	  font-family: 'JetBrains Mono', monospace;
+	  font-size: 0.7rem;
+	  letter-spacing: 0.22em;
+	  text-transform: uppercase;
+	  color: var(--accent);
+	  border: 1px solid var(--accent-border);
+	  padding: 0.4rem 0.95rem;
+	  margin-bottom: 2.25rem;
+	  animation: blur-in 0.7s ease both;
+	  background: rgba(217, 119, 87, 0.04);
+	}
+
+	.eyebrow-dot {
+	  width: 5px;
+	  height: 5px;
+	  border-radius: 50%;
+	  background: var(--accent);
+	  box-shadow: 0 0 8px var(--accent);
+	  animation: pulse var(--pulse-dur) ease-in-out infinite;
+	}
+
+	@keyframes pulse {
+	  0%, 100% { opacity: 1; transform: scale(1); }
+	  50% { opacity: 0.45; transform: scale(0.85); }
+	}
+
+	.hero-content h1 {
+	  font-size: clamp(2.6rem, 5.4vw, 4.6rem);
+	  font-weight: 700;
+	  line-height: 1.02;
+	  letter-spacing: -0.035em;
+	  margin-bottom: 1.6rem;
+	  animation: blur-in 0.9s 0.15s ease both;
+	}
+
+	.hero-content h1 .accent {
+	  color: var(--accent);
+	  font-style: italic;
+	  font-weight: 500;
+	}
+
+	.hero-sub {
+	  font-size: 1.05rem;
+	  color: var(--muted);
+	  max-width: 460px;
+	  line-height: 1.7;
+	  animation: blur-in 0.9s 0.3s ease both;
+	}
+
+	.hero-actions {
+	  display: flex;
+	  align-items: center;
+	  gap: 1.5rem;
+	  animation: blur-in 0.9s 0.45s ease both;
+	}
+
+	.btn-primary {
+	  display: inline-flex;
+	  align-items: center;
+	  gap: 0.55rem;
+	  background: var(--accent);
+	  color: var(--bg);
+	  text-decoration: none;
+	  font-size: 0.85rem;
+	  font-weight: 600;
+	  letter-spacing: 0.04em;
+	  padding: 0.9rem 1.6rem;
+	  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+	  box-shadow: 0 0 0 0 rgba(217, 119, 87, 0);
+	}
+
+	.btn-primary:hover {
+	  transform: translateY(-2px);
+	  box-shadow: 0 14px 38px -14px rgba(217, 119, 87, 0.55);
+	}
+
+	.btn-ghost {
+	  color: var(--muted);
+	  text-decoration: none;
+	  font-size: 0.85rem;
+	  letter-spacing: 0.02em;
+	  transition: color 0.2s;
+	  display: inline-flex;
+	  align-items: center;
+	  gap: 0.4rem;
+	}
+
+	.btn-ghost:hover { color: var(--text); }
+
+	.btn-ghost .arrow { transition: transform 0.25s; }
+	.btn-ghost:hover .arrow { transform: translateX(4px); }
+
+	/* ─── Globe ─── */
+	.globe-stage {
+	  position: relative;
+	  height: 100%;
+	  width: 100%;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  animation: blur-in 1.2s 0.5s ease both;
+	}
+
+	.globe {
+	  position: relative;
+	  width: min(560px, 46vw, 78vh);
+	  aspect-ratio: 1;
+	}
+
+	/* Soft glow halo */
+	.globe::before {
+	  content: '';
+	  position: absolute;
+	  inset: -18%;
+	  background: radial-gradient(circle, rgba(217, 119, 87, 0.16) 0%, rgba(217, 119, 87, 0.04) 35%, transparent 65%);
+	  filter: blur(8px);
+	  z-index: 0;
+	}
+
+	/* Faint orbital rings */
+	.orbit {
+	  position: absolute;
+	  inset: -8%;
+	  border: 1px dashed rgba(217, 119, 87, 0.22);
+	  border-radius: 50%;
+	  z-index: 1;
+	  animation: spin-rev var(--orbit-dur) linear infinite;
+	}
+
+	.orbit-2 {
+	  inset: -16%;
+	  border-style: dotted;
+	  border-color: rgba(255,255,255,0.06);
+	  animation-duration: var(--orbit-dur-2);
+	}
+
+	.orbit-tick {
+	  position: absolute;
+	  top: 50%;
+	  left: -4px;
+	  width: 8px;
+	  height: 8px;
+	  background: var(--accent);
+	  border-radius: 50%;
+	  transform: translateY(-50%);
+	  box-shadow: 0 0 14px var(--accent);
+	}
+
+	.globe-svg {
+	  position: relative;
+	  width: 100%;
+	  height: 100%;
+	  z-index: 2;
+	  overflow: hidden;
+	  border-radius: 50%;
+	  background:
+	    radial-gradient(circle at 35% 30%, #2a1d16 0%, #14100d 55%, #08060a 100%);
+	  box-shadow:
+	    inset 0 0 60px rgba(0,0,0,0.7),
+	    inset -20px -20px 80px rgba(0,0,0,0.6),
+	    inset 30px 30px 80px rgba(217, 119, 87, 0.08),
+	    0 0 0 1px rgba(217, 119, 87, 0.15);
+	}
+
+	/* Spinning meridian layer */
+	.globe-spin {
+	  position: absolute;
+	  inset: 0;
+	  animation: globe-rotate var(--rotate-dur) linear infinite;
+	  transform-origin: center;
+	}
+
+	.globe-spin svg {
+	  width: 100%;
+	  height: 100%;
+	  display: block;
+	}
+
+	@keyframes globe-rotate {
+	  from { transform: translateX(0%); }
+	  to   { transform: translateX(-50%); }
+	}
+
+	@keyframes spin-rev {
+	  from { transform: rotate(0deg); }
+	  to   { transform: rotate(-360deg); }
+	}
+
+	/* Static parallels overlay (latitude lines, don't translate) */
+	.globe-lat {
+	  position: absolute;
+	  inset: 0;
+	  pointer-events: none;
+	  z-index: 3;
+	}
+
+	/* Highlight glare */
+	.globe-glare {
+	  position: absolute;
+	  inset: 0;
+	  border-radius: 50%;
+	  background:
+	    radial-gradient(circle at 30% 25%, rgba(255, 220, 200, 0.10) 0%, transparent 35%),
+	    radial-gradient(circle at 75% 80%, rgba(0,0,0,0.45) 0%, transparent 50%);
+	  z-index: 4;
+	  pointer-events: none;
+	}
+
+	/* Coordinate labels around globe */
+	.coord {
+	  position: absolute;
+	  font-family: 'JetBrains Mono', monospace;
+	  font-size: 0.65rem;
+	  letter-spacing: 0.12em;
+	  color: var(--muted-2);
+	  z-index: 5;
+	  white-space: nowrap;
+	}
+	.coord.tl { top: 4%;  left: 4%;  }
+	.coord.tr { top: 4%;  right: 4%; text-align: right; }
+	.coord.bl { bottom: 4%; left: 4%; }
+	.coord.br { bottom: 4%; right: 4%; text-align: right; }
+
+	/* Pulse markers */
+	.marker {
+	  position: absolute;
+	  width: 7px;
+	  height: 7px;
+	  border-radius: 50%;
+	  background: var(--accent);
+	  z-index: 5;
+	  box-shadow: 0 0 10px var(--accent);
+	}
+	.marker::after {
+	  content: '';
+	  position: absolute;
+	  inset: -6px;
+	  border-radius: 50%;
+	  border: 1px solid var(--accent);
+	  animation: ping var(--ping-dur) ease-out infinite;
+	  opacity: 0;
+	}
+	.marker.m1 { top: 32%; left: 38%; }
+	.marker.m1::after { animation-delay: 0s; }
+	.marker.m2 { top: 58%; left: 60%; }
+	.marker.m2::after { animation-delay: 0.9s; }
+	.marker.m3 { top: 44%; left: 70%; }
+	.marker.m3::after { animation-delay: 1.7s; }
+
+	@keyframes ping {
+	  0%   { transform: scale(0.5); opacity: 1; }
+	  80%  { transform: scale(2.6); opacity: 0; }
+	  100% { transform: scale(2.6); opacity: 0; }
+	}
+
+	/* ─── Footer floating bar ─── */
+	.foot {
+	  position: fixed;
+	  bottom: 0;
+	  left: 0;
+	  right: 0;
+	  z-index: 50;
+	  border-top: 1px solid var(--border);
+	  background: rgba(13, 11, 9, 0.55);
+	  backdrop-filter: blur(12px);
+	}
+	.foot-inner {
+	  max-width: 1320px;
+	  margin: 0 auto;
+	  padding: 0.85rem 2.5rem;
+	  display: flex;
+	  align-items: center;
+	  justify-content: space-between;
+	  font-family: 'JetBrains Mono', monospace;
+	  font-size: 0.7rem;
+	  letter-spacing: 0.16em;
+	  text-transform: uppercase;
+	  color: var(--muted-2);
+	}
+	.foot-inner span.live {
+	  color: var(--accent);
+	  display: inline-flex;
+	  align-items: center;
+	  gap: 0.5rem;
+	}
+	.foot-inner span.live::before {
+	  content: '';
+	  width: 6px; height: 6px;
+	  border-radius: 50%;
+	  background: var(--accent);
+	  box-shadow: 0 0 8px var(--accent);
+	  animation: pulse 2s ease-in-out infinite;
+	}
+
+	/* Animations */
+	@keyframes blur-in {
+	  from { opacity: 0; filter: blur(14px); transform: translateY(10px); }
+	  to   { opacity: 1; filter: blur(0); transform: none; }
+	}
+
+	/* ─── Responsive ─── */
+	@media (max-width: 1024px) {
+	  body { overflow-y: auto; overflow-x: hidden; }
+	  main {
+	    height: auto;
+	    min-height: 100vh;
+	    grid-template-columns: 1fr;
+	    padding: 6rem 2rem 5rem;
+	    gap: 3rem;
+	    text-align: left;
+	  }
+	  .globe-stage { order: -1; height: auto; }
+	  .globe { width: min(420px, 70vw); }
+	  .foot { position: relative; }
+	}
+
+	@media (max-width: 640px) {
+	  body { overflow-y: auto; overflow-x: hidden; }
+	  html, body { height: auto; }
+	  .nav-inner { padding: 0 1.25rem; height: 3.75rem; }
+	  .nav-logo { font-size: 0.85rem; letter-spacing: 0.12em; }
+
+	  main {
+	    padding: 5.5rem 1.25rem 4.5rem;
+	    gap: 2.25rem;
+	    grid-template-columns: 1fr;
+	    min-height: calc(100svh - 3.75rem);
+	    align-items: center;
+	  }
+
+	  .hero-content { text-align: center; max-width: 100%; }
+	  .hero-content h1 {
+	    font-size: clamp(2.4rem, 11vw, 3.4rem);
+	    line-height: 1.05;
+	    margin-bottom: 1.1rem;
+	  }
+	  .hero-sub {
+	    font-size: 0.95rem;
+	    margin: 0 auto;
+	    max-width: 320px;
+	  }
+	  .eyebrow {
+	    margin-bottom: 1.6rem;
+	    font-size: 0.62rem;
+	    padding: 0.35rem 0.8rem;
+	  }
+
+	  .globe-stage { order: -1; }
+	  .globe { width: min(78vw, 320px); }
+	  .orbit { inset: -6%; }
+	  .orbit-2 { inset: -12%; }
+
+	  /* Hide tiny-text decorative bits — they crowd small screens */
+	  .coord { display: none; }
+
+	  .foot-inner {
+	    padding: 0.85rem 1.25rem;
+	    gap: 0.75rem;
+	    font-size: 0.6rem;
+	    letter-spacing: 0.12em;
+	    flex-wrap: wrap;
+	    justify-content: center;
+	  }
+	  .foot-inner .foot-mid { display: none; }
+	}
+
+	@media (max-width: 380px) {
+	  .hero-content h1 { font-size: 2.2rem; }
+	  .globe { width: 72vw; }
+	}
+	</style>
 </head>
 <body>
 
@@ -24,123 +571,406 @@
 	<nav>
 		<div class="nav-inner">
 			<a href="#" class="nav-logo">Northmann</a>
-			<ul class="nav-links">
-				<li><a href="#about">About</a></li>
-				<li><a href="#contact" class="nav-cta">Get in touch</a></li>
-			</ul>
 		</div>
 	</nav>
 
+	<!-- Stage -->
 	<main>
-
-		<!-- Hero -->
-		<section id="hero">
-			<div class="hero-content">
-				<div class="badge">
-					<span class="badge-dot"></span>
-					Northmann
-				</div>
-				<h1>AI will have a vast<br>impact on the world.</h1>
-				<p class="hero-sub">
-					We are here to make sure that impact is in your hands.
-					Not the other way around.
-				</p>
-				<div class="hero-actions">
-					<a href="#contact" class="btn-primary">Get in touch</a>
-					<a href="#about" class="btn-ghost">
-						Learn more <span class="arrow">→</span>
-					</a>
-				</div>
+		<!-- Left: hero copy -->
+		<div class="hero-content">
+			<div class="eyebrow">
+				<span class="eyebrow-dot"></span>
+				Northmann · Est. 2025
 			</div>
-		</section>
+			<h1>Reshape <span class="accent">the world.</span></h1>
+			<p class="hero-sub">
+				Intelligent systems are in transition.
+			</p>
+		</div>
 
-		<!-- About -->
-		<section id="about">
-			<div class="section-inner">
-				<p class="section-label fade-up">About</p>
-				<div class="about-text">
-					<h2 class="fade-up delay-1">The AI transition<br>is already underway</h2>
-					<p class="fade-up delay-2">
-						Northmann is a technology company with a focused conviction. AI will
-						fundamentally reshape how the world operates. Across industries,
-						across borders, and across every layer of daily life.
-						The question is not whether this shift will happen. It is whether you are ready for it.
-					</p>
+		<!-- Right: rotating globe -->
+		<div class="globe-stage">
+			<div class="globe">
+				<div class="orbit orbit-2"></div>
+				<div class="orbit"><div class="orbit-tick"></div></div>
+
+				<div class="globe-svg">
+					<!-- Spinning longitude / continent layer (duplicated for seamless loop) -->
+					<div class="globe-spin">
+						<svg viewBox="0 0 1000 500" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+							<defs>
+								<!-- One world tile, drawn twice side-by-side for seamless loop -->
+								<g id="world">
+									<!-- Meridians (longitude lines), curved to fake sphericality -->
+									<g stroke="var(--accent)" stroke-width="1" fill="none" style="opacity: var(--meridian-op)">
+										<path d="M 25 0 Q 12 250 25 500" />
+										<path d="M 75 0 Q 55 250 75 500" />
+										<path d="M 125 0 Q 100 250 125 500" />
+										<path d="M 175 0 Q 150 250 175 500" />
+										<path d="M 225 0 Q 210 250 225 500" />
+										<path d="M 275 0 Q 270 250 275 500" />
+										<path d="M 325 0 Q 325 250 325 500" />
+										<path d="M 375 0 Q 380 250 375 500" />
+										<path d="M 425 0 Q 440 250 425 500" />
+										<path d="M 475 0 Q 488 250 475 500" />
+									</g>
+									<!-- Continent-ish blobs as dot clusters -->
+									<g fill="var(--accent)" style="opacity: var(--continent-op)">
+										<!-- Cluster A -->
+										<circle cx="60"  cy="180" r="2.2"/>
+										<circle cx="72"  cy="172" r="1.8"/>
+										<circle cx="80"  cy="190" r="2.4"/>
+										<circle cx="92"  cy="200" r="1.6"/>
+										<circle cx="100" cy="215" r="2.0"/>
+										<circle cx="110" cy="240" r="2.4"/>
+										<circle cx="124" cy="260" r="2.0"/>
+										<circle cx="140" cy="280" r="1.8"/>
+										<circle cx="155" cy="300" r="2.0"/>
+										<circle cx="100" cy="160" r="1.6"/>
+										<circle cx="115" cy="170" r="1.6"/>
+										<circle cx="130" cy="155" r="1.4"/>
+										<!-- Cluster B (Eurasia-ish) -->
+										<circle cx="180" cy="160" r="2.4"/>
+										<circle cx="200" cy="150" r="2.2"/>
+										<circle cx="220" cy="155" r="1.8"/>
+										<circle cx="240" cy="140" r="2.2"/>
+										<circle cx="260" cy="135" r="2.4"/>
+										<circle cx="280" cy="150" r="2.0"/>
+										<circle cx="300" cy="140" r="1.8"/>
+										<circle cx="320" cy="160" r="2.2"/>
+										<circle cx="340" cy="170" r="2.0"/>
+										<circle cx="200" cy="190" r="2.0"/>
+										<circle cx="225" cy="200" r="1.6"/>
+										<circle cx="250" cy="210" r="1.8"/>
+										<circle cx="275" cy="195" r="1.6"/>
+										<circle cx="300" cy="220" r="2.0"/>
+										<circle cx="325" cy="240" r="1.8"/>
+										<!-- Africa-ish -->
+										<circle cx="220" cy="260" r="2.0"/>
+										<circle cx="235" cy="285" r="2.2"/>
+										<circle cx="240" cy="310" r="2.0"/>
+										<circle cx="245" cy="335" r="1.8"/>
+										<circle cx="225" cy="360" r="1.6"/>
+										<!-- Cluster C (Pacific / Americas hint) -->
+										<circle cx="380" cy="200" r="2.0"/>
+										<circle cx="400" cy="220" r="1.8"/>
+										<circle cx="420" cy="240" r="2.2"/>
+										<circle cx="440" cy="260" r="2.0"/>
+										<circle cx="460" cy="285" r="1.8"/>
+										<circle cx="380" cy="280" r="1.6"/>
+										<circle cx="395" cy="305" r="1.8"/>
+										<circle cx="410" cy="325" r="2.0"/>
+										<!-- Australia-ish -->
+										<circle cx="350" cy="340" r="2.2"/>
+										<circle cx="370" cy="355" r="1.8"/>
+										<circle cx="385" cy="345" r="1.6"/>
+										<!-- Smaller scatter -->
+										<circle cx="50"  cy="350" r="1.4"/>
+										<circle cx="70"  cy="360" r="1.4"/>
+										<circle cx="160" cy="395" r="1.4"/>
+										<circle cx="285" cy="385" r="1.4"/>
+									</g>
+								</g>
+							</defs>
+
+							<!-- Place world tile twice so translate -50% wraps seamlessly -->
+							<use href="#world" x="0"   y="0" />
+							<use href="#world" x="500" y="0" />
+						</svg>
 					</div>
-			</div>
-		</section>
 
-		<!-- Pillars -->
-		<section id="pillars">
-			<div class="section-inner pillars-grid">
-				<div class="pillar fade-up delay-1">
-					<h3>We move with urgency</h3>
-					<p>The window to get AI right is open now. Build for today, designed to scale as the technology evolves.</p>
-				</div>
-				<div class="pillar fade-up delay-2">
-					<h3>We work in the real world</h3>
-					<p>No demos, no prototypes that stay in a drawer. Build for production, for people, and for the outcomes that actually matter to your organization.</p>
-				</div>
-				<div class="pillar fade-up delay-3">
-					<h3>People and AI, together</h3>
-					<p>The best outcomes come from close collaboration between human judgment and intelligent systems. Design for that balance. Not to replace one with the other.</p>
-				</div>
-			</div>
-		</section>
+					<!-- Static latitude / parallel lines (don't spin with globe) -->
+					<svg class="globe-lat" viewBox="0 0 500 500" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+						<g fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1">
+							<ellipse cx="250" cy="250" rx="248" ry="20"/>
+							<ellipse cx="250" cy="250" rx="248" ry="60"/>
+							<ellipse cx="250" cy="250" rx="248" ry="110"/>
+							<ellipse cx="250" cy="250" rx="248" ry="170"/>
+							<ellipse cx="250" cy="250" rx="248" ry="225"/>
+						</g>
+						<!-- Equator emphasized -->
+						<ellipse cx="250" cy="250" rx="248" ry="20" fill="none" stroke="var(--accent)" stroke-opacity="0.55" stroke-width="1"/>
+					</svg>
 
-		<!-- Contact -->
-		<section id="contact">
-			<div class="section-inner contact-simple">
-				<div class="fade-up">
-					<p class="section-label">Contact</p>
-					<h2>Ready to work<br>with AI?</h2>
-					<p>
-						Whether you have a defined project or just a problem
-						worth solving, reach out.
-					</p>
-					<div class="contact-actions">
-						<a href="mailto:Northmann.as@gmail.com" class="btn-primary">Send us a message</a>
-						<a href="https://linkedin.com/company/northmann-tech/" target="_blank" rel="noopener" class="btn-ghost">
-							LinkedIn, Northmann <span class="arrow">↗</span>
-						</a>
-					</div>
-				</div>
-			</div>
-		</section>
+					<!-- Glare / shading -->
+					<div class="globe-glare"></div>
 
+					<!-- Pulse markers (over glare) -->
+					<div class="marker m1"></div>
+					<div class="marker m2"></div>
+					<div class="marker m3"></div>
+				</div>
+
+				<!-- Coordinate labels -->
+				<span class="coord tl">N 60°23′</span>
+				<span class="coord tr">E 05°19′</span>
+				<span class="coord bl">LAT · 0°</span>
+				<span class="coord br">LON · ∞</span>
+			</div>
+		</div>
 	</main>
 
-	<footer>
-		<div class="footer-inner">
-			<a href="#" class="footer-logo">Northmann</a>
-			<p>&copy; 2025 Northmann</p>
+	<!-- Footer bar -->
+	<footer class="foot">
+		<div class="foot-inner">
+			<span class="live">System online</span>
+			<span class="foot-mid">Bergen · Norway</span>
+			<span>© 2025 Northmann</span>
 		</div>
 	</footer>
 
+	<!-- Tweaks panel (host wires this in via toolbar toggle) -->
+	<style>
+	  /* Data ring overlay (visible only in dense mode) */
+	  .data-ring {
+	    position: absolute;
+	    inset: -22%;
+	    border-radius: 50%;
+	    border: 1px solid var(--accent-border);
+	    opacity: var(--extra-data-op);
+	    animation: spin-rev 90s linear infinite reverse;
+	    z-index: 1;
+	    pointer-events: none;
+	    transition: opacity 0.5s ease;
+	  }
+	  .data-ring::before, .data-ring::after {
+	    content: '';
+	    position: absolute;
+	    border-radius: 50%;
+	    border: 1px dashed var(--accent-soft);
+	  }
+	  .data-ring::before { inset: 8%;  opacity: 0.55; }
+	  .data-ring::after  { inset: 16%; opacity: 0.35; border-style: dotted; }
+
+	  /* Live controls — top-right of the page, always visible */
+	  .twk {
+	    position: fixed;
+	    top: calc(4.25rem + 12px);
+	    right: 18px;
+	    z-index: 90;
+	    width: 240px;
+	    background: rgba(13, 11, 9, 0.55);
+	    backdrop-filter: blur(18px) saturate(140%);
+	    -webkit-backdrop-filter: blur(18px) saturate(140%);
+	    border: 1px solid var(--border);
+	    border-radius: 10px;
+	    color: var(--text);
+	    font-family: 'Inter', sans-serif;
+	    overflow: hidden;
+	    transition: width 0.25s ease, background 0.25s ease;
+	  }
+	  .twk-hd {
+	    display: flex; align-items: center; justify-content: space-between;
+	    padding: 10px 12px;
+	    font-family: 'JetBrains Mono', monospace;
+	    font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
+	    color: var(--accent);
+	    cursor: pointer;
+	    user-select: none;
+	  }
+	  .twk-hd .twk-toggle {
+	    color: var(--muted);
+	    font-size: 10px;
+	    transition: transform 0.25s ease;
+	  }
+	  .twk.collapsed .twk-hd .twk-toggle { transform: rotate(-90deg); }
+	  .twk-body {
+	    padding: 4px 12px 14px;
+	    display: flex; flex-direction: column; gap: 14px;
+	    border-top: 1px solid var(--border);
+	    overflow: hidden;
+	    transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+	  }
+	  .twk.collapsed .twk-body {
+	    max-height: 0;
+	    padding-top: 0; padding-bottom: 0;
+	    opacity: 0;
+	    border-top-color: transparent;
+	  }
+	  .twk-grp { display: flex; flex-direction: column; gap: 6px; }
+	  .twk-lbl {
+	    font-family: 'JetBrains Mono', monospace;
+	    font-size: 9px; letter-spacing: 0.18em;
+	    text-transform: uppercase; color: var(--muted);
+	  }
+	  .twk-seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; }
+	  .twk-seg button {
+	    appearance: none; cursor: pointer;
+	    background: rgba(255,255,255,0.03);
+	    border: 1px solid var(--border);
+	    color: var(--muted);
+	    padding: 7px 4px;
+	    font-family: 'Inter', sans-serif;
+	    font-size: 10.5px; font-weight: 500;
+	    letter-spacing: 0.02em;
+	    border-radius: 5px;
+	    transition: all 0.18s ease;
+	  }
+	  .twk-seg button:hover { color: var(--text); border-color: var(--border-strong); }
+	  .twk-seg button.on {
+	    background: var(--accent);
+	    color: var(--bg);
+	    border-color: var(--accent);
+	  }
+
+	  @media (max-width: 1024px) {
+	    .twk { top: auto; bottom: 4.5rem; right: 12px; width: 220px; }
+	  }
+	  @media (max-width: 640px) {
+	    .twk { width: calc(100vw - 24px); right: 12px; left: 12px; bottom: 4rem; }
+	  }
+	</style>
+
+	<div class="twk collapsed" id="twk">
+	  <div class="twk-hd" id="twk-hd">
+	    <span>Customize</span>
+	    <span class="twk-toggle">▾</span>
+	  </div>
+	  <div class="twk-body">
+	    <div class="twk-grp">
+	      <div class="twk-lbl">Mood</div>
+	      <div class="twk-seg" data-key="mood">
+	        <button data-val="ember">Ember</button>
+	        <button data-val="arctic">Arctic</button>
+	        <button data-val="verdant">Verdant</button>
+	        <button data-val="void">Void</button>
+	      </div>
+	    </div>
+
+	    <div class="twk-grp">
+	      <div class="twk-lbl">Tempo</div>
+	      <div class="twk-seg" data-key="tempo">
+	        <button data-val="calm">Calm</button>
+	        <button data-val="steady">Steady</button>
+	        <button data-val="frantic">Frantic</button>
+	      </div>
+	    </div>
+
+	    <div class="twk-grp">
+	      <div class="twk-lbl">Density</div>
+	      <div class="twk-seg" data-key="density">
+	        <button data-val="sparse">Sparse</button>
+	        <button data-val="standard">Standard</button>
+	        <button data-val="dense">Dense</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
 	<script>
-		const observer = new IntersectionObserver((entries) => {
-			entries.forEach(entry => {
-				if (entry.isIntersecting) entry.target.classList.add('visible');
-			});
-		}, { threshold: 0.12 });
+	(function () {
+	  // ─── State (between EDITMODE markers so host can persist) ──
+	  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+	    "mood": "verdant",
+	    "tempo": "steady",
+	    "density": "sparse"
+	  }/*EDITMODE-END*/;
 
-		document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+	  const state = Object.assign({}, TWEAK_DEFAULTS);
 
-		document.querySelectorAll('a[href^="#"]').forEach(link => {
-			link.addEventListener('click', e => {
-				const href = link.getAttribute('href');
-				if (href === '#') {
-					e.preventDefault();
-					window.scrollTo({ top: 0, behavior: 'smooth' });
-					return;
-				}
-				const target = document.querySelector(href);
-				if (target) {
-					e.preventDefault();
-					target.scrollIntoView({ behavior: 'smooth' });
-				}
-			});
-		});
+	  // ─── Presets ──
+	  const MOODS = {
+	    ember:   { r: 217, g: 119, b: 87,  bg: '#0d0b09', text: '#ede8e3', muted: '#8a7a70', muted2: '#4f4039', glow1: 0.10, glow2: 0.05 },
+	    arctic:  { r: 122, g: 178, b: 224, bg: '#070a0d', text: '#e3eaf0', muted: '#7088a0', muted2: '#384858', glow1: 0.12, glow2: 0.06 },
+	    verdant: { r: 132, g: 196, b: 142, bg: '#080b09', text: '#e4ecdf', muted: '#7d9080', muted2: '#3d4a3f', glow1: 0.10, glow2: 0.05 },
+	    void:    { r: 230, g: 230, b: 230, bg: '#08080a', text: '#ececec', muted: '#7a7a82', muted2: '#3a3a40', glow1: 0.05, glow2: 0.03 }
+	  };
+
+	  const TEMPOS = {
+	    calm:    { rotate: '70s', pulse: '4.2s', ping: '4.4s', orbit: '120s', orbit2: '210s' },
+	    steady:  { rotate: '28s', pulse: '2.4s', ping: '2.6s', orbit: '60s',  orbit2: '120s' },
+	    frantic: { rotate: '9s',  pulse: '0.9s', ping: '1.1s', orbit: '20s',  orbit2: '40s'  }
+	  };
+
+	  const DENSITIES = {
+	    sparse:   { continent: 0.18, meridian: 0.07, extra: 0 },
+	    standard: { continent: 0.55, meridian: 0.22, extra: 0 },
+	    dense:    { continent: 0.85, meridian: 0.45, extra: 1 }
+	  };
+
+	  // ─── Apply ──
+	  function apply() {
+	    const root = document.documentElement.style;
+
+	    const m = MOODS[state.mood] || MOODS.ember;
+	    root.setProperty('--accent-r', m.r);
+	    root.setProperty('--accent-g', m.g);
+	    root.setProperty('--accent-b', m.b);
+	    root.setProperty('--accent', `rgb(${m.r}, ${m.g}, ${m.b})`);
+	    root.setProperty('--bg', m.bg);
+	    root.setProperty('--text', m.text);
+	    root.setProperty('--muted', m.muted);
+	    root.setProperty('--muted-2', m.muted2);
+	    root.setProperty('--glow-1', m.glow1);
+	    root.setProperty('--glow-2', m.glow2);
+
+	    const t = TEMPOS[state.tempo] || TEMPOS.steady;
+	    root.setProperty('--rotate-dur', t.rotate);
+	    root.setProperty('--pulse-dur', t.pulse);
+	    root.setProperty('--ping-dur', t.ping);
+	    root.setProperty('--orbit-dur', t.orbit);
+	    root.setProperty('--orbit-dur-2', t.orbit2);
+
+	    const d = DENSITIES[state.density] || DENSITIES.standard;
+	    root.setProperty('--continent-op', d.continent);
+	    root.setProperty('--meridian-op', d.meridian);
+	    root.setProperty('--extra-data-op', d.extra);
+
+	    // Update segmented button visuals
+	    document.querySelectorAll('.twk-seg').forEach(seg => {
+	      const key = seg.dataset.key;
+	      seg.querySelectorAll('button').forEach(b => {
+	        b.classList.toggle('on', b.dataset.val === state[key]);
+	      });
+	    });
+	  }
+
+	  // ─── Wire segmented buttons ──
+	  document.querySelectorAll('.twk-seg').forEach(seg => {
+	    const key = seg.dataset.key;
+	    seg.addEventListener('click', e => {
+	      const btn = e.target.closest('button');
+	      if (!btn) return;
+	      state[key] = btn.dataset.val;
+	      apply();
+	      try {
+	        window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [key]: state[key] } }, '*');
+	      } catch(_) {}
+	    });
+	  });
+
+	  // Inject data ring into globe
+	  const globeEl = document.querySelector('.globe');
+	  if (globeEl) {
+	    const ring = document.createElement('div');
+	    ring.className = 'data-ring';
+	    globeEl.insertBefore(ring, globeEl.firstChild);
+	  }
+
+	  apply();
+
+	  // ─── Persist user choices in localStorage so refresh keeps them ──
+	  try {
+	    const saved = JSON.parse(localStorage.getItem('northmann-tweaks') || '{}');
+	    Object.keys(saved).forEach(k => { if (k in state) state[k] = saved[k]; });
+	    apply();
+	  } catch(_) {}
+
+	  function persist() {
+	    try { localStorage.setItem('northmann-tweaks', JSON.stringify(state)); } catch(_) {}
+	  }
+
+	  // Re-wire seg clicks to also persist
+	  document.querySelectorAll('.twk-seg').forEach(seg => {
+	    seg.addEventListener('click', () => persist());
+	  });
+
+	  // Collapse / expand panel
+	  const panel = document.getElementById('twk');
+	  document.getElementById('twk-hd').addEventListener('click', () => {
+	    panel.classList.toggle('collapsed');
+	  });
+	})();
 	</script>
 
 </body>
