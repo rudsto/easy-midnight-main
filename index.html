@@ -291,7 +291,7 @@
 
 	.globe {
 	  position: relative;
-	  width: min(560px, 46vw, 78vh);
+	  width: min(440px, 38vw, 64vh);
 	  aspect-ratio: 1;
 	}
 
@@ -308,7 +308,7 @@
 	/* Faint orbital rings */
 	.orbit {
 	  position: absolute;
-	  inset: -8%;
+	  inset: -5%;
 	  border: 1px dashed rgba(217, 119, 87, 0.22);
 	  border-radius: 50%;
 	  z-index: 1;
@@ -316,7 +316,7 @@
 	}
 
 	.orbit-2 {
-	  inset: -16%;
+	  inset: -11%;
 	  border-style: dotted;
 	  border-color: rgba(255,255,255,0.06);
 	  animation-duration: var(--orbit-dur-2);
@@ -501,7 +501,7 @@
 	    text-align: left;
 	  }
 	  .globe-stage { order: -1; height: auto; }
-	  .globe { width: min(420px, 70vw); }
+	  .globe { width: min(360px, 60vw); }
 	  .foot { position: relative; }
 	}
 
@@ -537,9 +537,9 @@
 	  }
 
 	  .globe-stage { order: -1; }
-	  .globe { width: min(78vw, 320px); }
-	  .orbit { inset: -6%; }
-	  .orbit-2 { inset: -12%; }
+	  .globe { width: min(70vw, 280px); }
+	  .orbit { inset: -4%; }
+	  .orbit-2 { inset: -9%; }
 
 	  /* Hide tiny-text decorative bits — they crowd small screens */
 	  .coord { display: none; }
@@ -557,7 +557,7 @@
 
 	@media (max-width: 380px) {
 	  .hero-content h1 { font-size: 2.2rem; }
-	  .globe { width: 72vw; }
+	  .globe { width: 64vw; }
 	}
 	</style>
 </head>
